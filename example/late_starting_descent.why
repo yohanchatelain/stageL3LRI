@@ -1,0 +1,18 @@
+theory Late_starting_descent
+
+use import list.List
+use import list.HdTlNoOpt
+
+function f (a b : list 'a) : list 'a =
+match b with
+|Nil -> g a Nil
+|_ -> f (Cons (hd b) a) (tl b)
+end
+
+with g (c d : list 'a) : list 'a =
+match c with
+|Nil -> d
+|_ -> g (tl c) (Cons (hd c) d)
+end
+
+end

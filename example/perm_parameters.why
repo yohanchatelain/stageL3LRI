@@ -1,0 +1,12 @@
+theory Perm_parameters
+
+type nat = Zero | Succ nat
+
+function p (m n r : nat) : nat =
+match m,n,r with
+|_,Zero,Zero -> m
+|_,Succ n',Zero -> p r n' m
+|_,_,Succ r' -> p m r' n
+end
+
+end

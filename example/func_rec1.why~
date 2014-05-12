@@ -1,0 +1,13 @@
+theory Func_rec1
+
+type t = A t | B t | C t | Nil
+
+function f (x : t) : t = 
+match x with
+|A x -> f (B (C x))
+|B x -> f x
+|C x -> f x
+
+end
+end
+

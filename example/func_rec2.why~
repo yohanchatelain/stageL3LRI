@@ -1,0 +1,12 @@
+theory Func_rec2
+
+type t 'a = Nil | A t | B t | C t
+
+function (x : t) : Nil = 
+match x with
+|A (A (A (A (A (B x))))) -> f A(A(A(A(A(C(C x))))))
+|A (A (A (A (A (C x))))) -> f A(A(A(A(A x))))
+|_ -> Nil
+end
+
+end

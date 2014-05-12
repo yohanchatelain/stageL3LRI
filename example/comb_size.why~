@@ -1,0 +1,7 @@
+theory Comb
+
+type node 'a = Leaf | Node (node 'a) (node 'a)
+
+function comb (x : node 'a) : node 'a =
+match x with
+|Leaf -> Leaf 

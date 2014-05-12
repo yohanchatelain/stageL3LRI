@@ -1,0 +1,12 @@
+theory Push_left 
+
+type node 'a = Leaf | Node (node 'a) (node 'a)
+
+function push_left (x : node 'a) : node 'a =
+match x with
+|Leaf -> Leaf
+|Node t Leaf -> Node t Leaf
+|Node t1 (Node t2 t3) -> push_left (Node (Node t1 t2) t3)
+end
+
+end

@@ -1,0 +1,14 @@
+theory Indirect_rec
+
+use import list.List
+use import list.HdTlNoOpt
+use import list.Append
+
+function f (i x : list 'a) : list 'a =
+match i with
+|Nil -> x
+|_ -> g (tl i) x i
+end
+
+with g (a b c: list 'a) : list 'a = f a (b ++ c)
+end

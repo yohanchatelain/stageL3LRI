@@ -1,0 +1,13 @@
+theory Comb_size
+
+type node 'a = Leaf | Node (node 'a) (node 'a)
+type nat = Zero | Succ nat
+
+function comb_size (t : node 'a) (s : nat) : node 'a =
+match t,s with
+|Leaf,_ -> Leaf 
+|Node t Leaf,Succ n -> Node (comb_size t n) Leaf
+|Node t1 (Node t2 t3),n -> comb_size (Node (Node t1 t2) t3) n 
+end
+
+end

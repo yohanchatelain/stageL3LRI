@@ -1,0 +1,15 @@
+theory Triple_rec1
+
+type a 'a = Nil | Cons (a 'a)
+
+function h1 (x : a 'a) =
+match x with
+|Cons (Cons (Cons x)) -> h2 x
+
+with h2 (x : a 'a) = h3 (Cons x)
+
+with h3 (x : a 'a) = h1 (Cons x)
+
+end
+
+end

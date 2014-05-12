@@ -1,0 +1,14 @@
+theory Mutuel_rec1
+
+type a 'a = Nil | Cons (a 'a)  
+type unit = ()
+
+function f (x : a 'a) : unit = g (Cons x)
+
+with g (x : a 'a) : unit = 
+match x with
+|Cons (Cons x) -> f x
+|_ -> ()
+end  
+
+end

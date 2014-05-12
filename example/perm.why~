@@ -1,0 +1,9 @@
+theory Perm
+
+function g (x1 x2 x3 x4 'a) : 'a
+
+function perms (x1 x2 x3 x4 : 'a) : 'a = 
+g (perms x2 x1 x3 x4) (perms x1 x3 x2 x4) 
+  (perms x1 x2 x4 x3) (perms x4 x2 x3 x1)
+
+end
