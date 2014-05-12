@@ -1,0 +1,16 @@
+
+(* test file *)
+
+constructor O 0
+constructor S 1
+
+let rec plus x y =
+  match x with
+  | O   -> y
+  | S p -> S (plus p y)
+  end
+
+let rec f x =
+  (x, x, x)
+
+

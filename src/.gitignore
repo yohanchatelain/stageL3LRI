@@ -1,0 +1,10 @@
+*.cm*
+*.annot
+*.o
+.depend
+lexer.ml
+parser.automaton
+parser.conflicts
+parser.ml
+parser.mli
+sct
