@@ -7,7 +7,7 @@ all: $(BIN)
 	./$(BIN) test.sct
 
 $(BIN):$(CMO)
-	ocamlc $(FLAGS) -o $(BIN) graphics.cma $(CMO)
+	ocamlc $(FLAGS) -o $(BIN) $(CMO)
 
 .SUFFIXES: .mli .ml .cmi .cmo .mll .mly
 
@@ -23,8 +23,6 @@ $(BIN):$(CMO)
 .mly.ml:
 	menhir -v $<
 
-.mly.mli:
-	ocamlyacc -v $<
 clean:
 	rm -f *.cm[io] *.o *~ $(BIN) $(GENERATED) parser.output
 
