@@ -71,6 +71,9 @@ branch:
 ;
 
 pattern:
+| LPAREN; e = pattern; COMMA; l = separated_nonempty_list(COMMA, pattern); RPAREN
+    { let id = Printf.sprintf "Tuple-%d" (1 + List.length l) in
+      Pconstr (id, e :: l) }
 | id = UIDENT; l = simple_pattern*
     { Pconstr (id, l) }
 | p = simple_pattern 
