@@ -1,0 +1,9 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec p m n r = 
+match (m,n,r) with
+|(_,Zero,Zero) -> m
+|(_,Succ n_,Zero) -> p r n_ m
+|(_,_,Succ r_) -> p m r_ n
+end

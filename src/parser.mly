@@ -3,6 +3,7 @@
 
 %{
   open Ast
+  let print_tuple l = Printf.sprintf "Tuple-%d" (1 + List.length l)
 %}
 
 %token <int> INTEGER
@@ -61,7 +62,7 @@ simple_expr:
 | LPAREN; e = expr; RPAREN
     { e }
 | LPAREN; e = expr; COMMA; l = separated_nonempty_list(COMMA, expr); RPAREN
-    { let id = Printf.sprintf "Tuple-%d" (1 + List.length l) in
+    { let id = print_tuple l in
       Econstr (id, e :: l) }
 ;
 
@@ -72,7 +73,7 @@ branch:
 
 pattern:
 | LPAREN; e = pattern; COMMA; l = separated_nonempty_list(COMMA, pattern); RPAREN
-    { let id = Printf.sprintf "Tuple-%d" (1 + List.length l) in
+    { let id =  print_tuple l in
       Pconstr (id, e :: l) }
 | id = UIDENT; l = simple_pattern*
     { Pconstr (id, l) }

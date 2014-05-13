@@ -29,7 +29,7 @@
 let lower = ['a'-'z']
 let upper = ['A'-'Z']
 let digit = ['0'-'9']
-let letter = lower | upper | digit
+let letter = lower | upper | digit | '_'
 let lident = lower letter*
 let uident = upper letter*
 let integer = ['0'-'9']+

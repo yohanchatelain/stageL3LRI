@@ -1,0 +1,11 @@
+constructor Nil 0
+constructor Cons 2
+constructor Concat 2
+
+let rec f i x =
+match i with
+|Nil -> x
+|Cons _ l -> g l x i
+end
+
+and g a b c = f a (Concat b c)	

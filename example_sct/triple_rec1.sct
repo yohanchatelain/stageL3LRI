@@ -1,0 +1,11 @@
+constructor Nil 0
+constructor Cons 1
+
+let rec function h1 x = 
+match x with
+|Cons (Cons (Cons x)) -> h2 x
+end
+
+and h2 x = h3 (Cons x)
+
+and h3 x = h1 (Cons x)

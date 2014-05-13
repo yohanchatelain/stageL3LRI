@@ -1,0 +1,9 @@
+constructor Nil 0
+constructor Cons 2
+
+let rec f x y = 
+match (x,y) with
+|(_,Nil) -> x
+|(Nil,Cons _ l) -> f y l
+|(Cons _ l,_) -> f y l
+end

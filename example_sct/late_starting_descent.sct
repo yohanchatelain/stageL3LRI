@@ -1,0 +1,14 @@
+constructor Nil 0
+constructor Cons 2
+
+let rec f a b = 
+match b with
+|Nil -> g a (Nil)
+|Cons x l -> f (Cons x a) l
+end
+
+and g c d = 
+match c with
+|Nil -> d
+|Cons x l -> g l (Cons x d)
+end

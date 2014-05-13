@@ -1,0 +1,12 @@
+constructor Leaf 0
+constructor Node 2
+
+constructor Zero 0
+constructor Succ 1
+
+let rec comb_size t s =
+match (t,s) with
+|(Leaf,_) -> Leaf
+|(Node t (Leaf),Succ n) -> Node (comb_size t n) Leaf
+|(Node t1 (Node t2 t3),_) -> comb_size (Node (Node t1 t2) t3) s
+end 

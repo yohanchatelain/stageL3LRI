@@ -1,0 +1,11 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec ack m n = 
+  match (m,n) with
+  |(Zero , _ ) -> Succ n
+  |(Succ m,Zero) -> ack m (Succ n)
+  |(Succ m,Succ n) -> ack m (ack m n)
+end
+
+ 

@@ -1,0 +1,10 @@
+constructor A 1
+constructor B 1
+constructor C 1
+
+let rec f t =
+match t with
+|A x -> f (B (C x))
+|B x -> f x
+|C x -> f x
+end 

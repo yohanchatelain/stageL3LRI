@@ -1,0 +1,11 @@
+constructor Nil 0
+constructor Cons 1
+constructor Unit 0
+
+let rec f x = g (Cons x)
+
+and g x = 
+match x with
+|Cons (Cons x) -> f x
+|_ -> Unit
+end
