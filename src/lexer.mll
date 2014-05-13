@@ -11,7 +11,7 @@
   let kwd_tbl =
     ["if", IF; "then", THEN; "else", ELSE; "in", IN;
      "let", LET; "rec", REC; "match", MATCH; "with", WITH; "end", END;
-     "constructor", CONSTRUCTOR;
+     "constructor", CONSTRUCTOR; "and" ,AND
     ]
 
   let id_or_kwd =

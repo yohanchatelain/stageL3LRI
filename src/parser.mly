@@ -8,7 +8,7 @@
 %token <int> INTEGER
 %token <string> LIDENT
 %token <string> UIDENT
-%token IF THEN ELSE LET REC IN MATCH WITH CONSTRUCTOR END
+%token IF THEN ELSE LET REC IN MATCH WITH CONSTRUCTOR END AND
 %token LPAREN RPAREN EQ ARROW BAR COMMA UNDERSCORE EOF
 
 /* Définitions des priorités et associativités des tokens */
@@ -29,8 +29,13 @@ prog:
 decl:
 | CONSTRUCTOR; id = UIDENT; n = INTEGER
   { Dconstructor (id, n) }
-| LET; REC; id = LIDENT; args = LIDENT+; EQ; e = expr
-   { Dfunction (id, args, e) }
+| LET; REC; l = separated_nonempty_list(AND, fundef)
+   { Dfunction l}
+;
+
+fundef:
+| id = LIDENT; args = LIDENT+; EQ; e = expr
+   { (id, args, e) }
 ;
 
 expr:
@@ -66,11 +71,18 @@ branch:
 ;
 
 pattern:
+| id = UIDENT; l = simple_pattern*
+    { Pconstr (id, l) }
+| p = simple_pattern 
+   { p }
+;
+
+simple_pattern:
 | id = LIDENT
     { Pvar id }
-| id = UIDENT; l = LIDENT*
-    { Pconstr (id, List.map (fun x -> Pvar x) l) }
 | UNDERSCORE
     { Pwild }
+| LPAREN; p = pattern; RPAREN
+  { p }
 ;
 

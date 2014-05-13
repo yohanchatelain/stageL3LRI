@@ -19,7 +19,7 @@ and branch =
 
 type decl =
   | Dconstructor of string * int
-  | Dfunction of string * string list * expr
+  | Dfunction of (string * string list * expr) list
 
 type program =
   decl list

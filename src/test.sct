@@ -2,7 +2,9 @@
 (* test file *)
 
 constructor O 0
+constructor Unit 0
 constructor S 1
+constructor T 3
 
 let rec plus x y =
   match x with
@@ -10,7 +12,13 @@ let rec plus x y =
   | S p -> S (plus p y)
   end
 
-let rec f x =
-  (x, x, x)
+let rec f x = g (S x)
 
+let rec g h =
+match S x with
+|S x -> f x
+|T a b c -> Unit
+|_ -> Unit
+end 
 
+let rec h x = f (S x)

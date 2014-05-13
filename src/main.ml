@@ -17,9 +17,9 @@ let options =
   ["--parse-only", Arg.Set parse_only,
    "  Pour ne faire uniquement que la phase d'analyse syntaxique"]
 
-let usage = "usage: mini-pascal [option] file.pas"
+let usage = "usage: mini-sct [option] file.sct"
 
-(* localise une erreur en indiquant la ligne et la colonne *)
+(* Localise une erreur en indiquant la ligne et la colonne *)
 let localisation pos =
   let l = pos.pos_lnum in
   let c = pos.pos_cnum - pos.pos_bol + 1 in
