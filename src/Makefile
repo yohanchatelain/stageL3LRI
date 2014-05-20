@@ -1,15 +1,15 @@
-CMO=lexer.cmo parser.cmo sct.cmo main.cmo
+CMA=str.cma
+CMO=lexer.cmo parser.cmo static_analyze.cmo sct.cmo main.cmo
 GENERATED = lexer.ml parser.ml parser.mli
 BIN=sct
 FLAGS=-annot
-
 all: $(BIN)
 	./$(BIN) test.sct
 
-$(BIN):$(CMO)
-	ocamlc $(FLAGS) -o $(BIN) $(CMO)
+$(BIN):$(CMO)	
+	ocamlc $(FLAGS) -o $(BIN) $(CMA) $(CMO)
 
-.SUFFIXES: .mli .ml .cmi .cmo .mll .mly
+.SUFFIXES: .mli .ml .cmi .cmo .cma .mll .mly
 
 .mli.cmi:
 	ocamlc $(FLAGS) -c  $<

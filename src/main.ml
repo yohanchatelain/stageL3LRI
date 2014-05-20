@@ -17,7 +17,7 @@ let options =
   ["--parse-only", Arg.Set parse_only,
    "  Pour ne faire uniquement que la phase d'analyse syntaxique"]
 
-let usage = "usage: mini-sct [option] file.sct"
+let usage = "usage: sct [option] file.sct"
 
 (* Localise une erreur en indiquant la ligne et la colonne *)
 let localisation pos =
@@ -78,8 +78,3 @@ let () =
 	(* Erreur pendant l'interprétation *)
 	eprintf "Erreur : %s@." s;
 	exit 1
-
-
-
-
-

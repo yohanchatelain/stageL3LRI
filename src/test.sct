@@ -2,8 +2,8 @@
 (* test file *)
 
 constructor O 0
-constructor Unit 0
 constructor S 1
+constructor Unit 0
 constructor T 3
 
 let rec plus x y =
@@ -14,10 +14,10 @@ let rec plus x y =
 
 let rec f x = g (S x)
 
-let rec g h =
-match S x with
-|S x -> f x
-|T a b c -> Unit
+and g h q=
+match x with
+|S (S x) -> f x
+|T a b c  -> Unit
 |_ -> Unit
 end 
 
