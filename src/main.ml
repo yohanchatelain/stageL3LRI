@@ -6,6 +6,8 @@ open Lexing
 
 (* Option de compilation, pour s'arrêter à l'issue du parser *)
 let parse_only = ref false
+let check_only = ref false
+let print = ref true
 
 (* Noms du fichier source *)
 let source_file = ref ""
@@ -15,7 +17,12 @@ let set_file s = source_file := s
 (* Les options du compilateur que l'on affiche en tapant sct --help *)
 let options =
   ["--parse-only", Arg.Set parse_only,
-   "  Pour ne faire uniquement que la phase d'analyse syntaxique"]
+   "  Pour ne faire uniquement que la phase d'analyse syntaxique";
+   "--check-only", Arg.Set check_only,
+   "  Pour ne faire uniquement que la vérification d'arité";
+   "--no-print", Arg.Clear print,
+   "  N'affiche pas l'arbre de syntax abstraite";
+  ]
 
 let usage = "usage: sct [option] file.sct"
 
@@ -60,6 +67,11 @@ let () =
     (* On s'arrête ici si on ne veut faire que le parsing *)
     if !parse_only then exit 0;
 
+    Static_analyze.check_arity p;
+    if !check_only then exit 0;
+
+    if !print then begin Pretty.program p; printf "@." end;
+
     Sct.prog p
   with
     | Lexer.Lexing_error c ->
@@ -76,5 +88,5 @@ let () =
 	exit 1
     | Sct.Error s->
 	(* Erreur pendant l'interprétation *)
-	eprintf "Erreur : %s@." s;
+	eprintf "Erreur: %s@." s;
 	exit 1

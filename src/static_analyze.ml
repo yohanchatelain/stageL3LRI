@@ -1,134 +1,68 @@
-(* Static analyse *) 
+(* Static analyse *)
 
+open Format
 open Ast
 open Str
 
-let iter n = for i=0 to n-1 do Printf.printf "x%d " i done 
+(* check total application functions and well arity constructors *)
 
-let rec print = function
-  |Dconstructor (s,i) -> Printf.printf "%s " s; iter i; print_newline ()  
-  |Dfunction ((name,arg,e)::l) -> 
-    Printf.printf "\n%s " name; (List.iter (Printf.printf "%s ") arg);
-    Printf.printf "= "; (print_E e); print (Dfunction l);
-  |Dfunction [] -> ()
+let bad_arity a b c =
+  eprintf "@[<hov 2>Error:@\nThe constructor/function %s expects %i argument(s),@ but is applied here to %i argument(s)@]@." a b c; exit 1
 
-and print_E = function
-  |Evar (s) -> Printf.printf "%s" s
-  |Econstr(s,[]) -> Printf.printf "%s[]" s
-  |Econstr (s,x::pl) -> Printf.printf "%s[" s; (print_E x); List.iter (fun s -> Printf.printf ","; print_E s) pl;
-    Printf.printf "]"
-  |Ecall (s,el) -> Printf.printf "%s"  s; List.iter
-    (fun e -> Printf.printf " "; print_E e) el
-  |Elet (s,e1,e2) -> Printf.printf "let %s = " s; print_E e1; 
-    Printf.printf " in \n"; print_E e2 
-  |Eif (e1,e2,e3) -> 
-    Printf.printf " if "; print_E e1; Printf.printf " then "; print_E e2;
-    Printf.printf " esle "; print_E e3
-  |Ematch (e,bl) -> Printf.printf "match "; print_E e ; Printf.printf " with\n"; 
- List.iter (fun s -> Printf.printf "|"; print_b s;print_newline ()) bl; Printf.printf "end\n"
-  
-and print_P = function
-  |Pwild -> Printf.printf "_"
-  |Pvar s -> Printf.printf "%s" s
-  |Pconstr(s,[]) -> Printf.printf "%s[]" s
-  |Pconstr (s,x::pl) -> Printf.printf "%s[" s; (print_P x); List.iter (fun s -> Printf.printf ","; print_P s) pl;
-    Printf.printf "]"
-  
-and print_b = function
-  |(p,e) -> print_P p; Printf.printf " -> "; print_E e 
+let unbound_var x =
+  eprintf "unbound variable %s@." x; exit 1
 
-(* check total application functions and well arity constructors *) 
- 
-let print_error a b c = function
-  |Ecall _ -> Format.open_hbox();Format.eprintf "\nError :\n@[<h>%s is previously called with %i argument(s) instead of %i\nOnly total applications are allowed\n\n@]" a b c ;
-exit 1
-  |Econstr _ -> Printf.eprintf "\nError :\nThe constructor %s expects %i
-argument(s),\nbut is applied here to %i argument(s)\n\n" a b c; exit 1
-  |_ -> ()
+let arity =
+  Hashtbl.create 5
 
-let check_tuple_cons name = 
-(Str.string_match (Str.regexp "Tuple-[1-9][0-9]*") name 0)
+let get_arity name =
+  try
+    Scanf.sscanf name "Tuple-%d" (fun n -> n)
+  with Scanf.Scan_failure _ | End_of_file ->
+  try
+    Hashtbl.find arity name
+  with Not_found ->
+    eprintf "unknown constructor/function %s@." name; exit 1
 
-exception Unknow_arg of string * string
+module S = Set.Make(String)
 
-let check_arity list = 
-  let h = Hashtbl.create 5 in
-  let rec aux = function
-    |[] -> ()
-    |(Dconstructor (name,arity))::l ->
-      Hashtbl.add h name arity; aux l
-    |(Dfunction fl)::l ->
-      List.iter (function name,args,_ -> 
-	Hashtbl.add h name (List.length args)) fl;
-      aux l;
-      List.iter (fun (_,_,e) -> aux2 (e::[])) fl
-
-  and aux2 = function  
-    |[] -> ()   
-    |(Evar _)::l-> aux2 l
-    |(Elet(_,e1,e2))::l -> aux2 (e1::(e2::l))
-    |(Eif(e1,e2,e3))::l -> aux2 (e1::(e2::(e3::l)))
-    |(Ematch(e,bl))::l -> (aux2 (e::l)); (aux3 bl)
-    |(Econstr (name,el) as ec)::l ->      
-      begin
-	if not (check_tuple_cons name) then	
-	  begin
-	    try
-	      begin
-		let real_length = (Hashtbl.find h name) in
-		let length = List.length el in
-		if real_length = length then
-		  aux2 l
-		else
-		  print_error name real_length length ec
-	      end
-	    with
-	    |Not_found -> 
-	      raise (Unknow_arg ("constructor",name)) 	      
-	  end
-	else
-	  aux2 l
-      end      
-    |(Ecall (name,el) as ec )::l  -> 
-      begin
-	try
-	  let real_length = Hashtbl.find h name in 
-	  let length = List.length el in 
-	  begin
-	  if real_length = length then
-	    aux2 l
-	  else
-	    print_error name real_length length ec;
-	  end	
-	with
-	|Not_found -> 
-	  Hashtbl.add h name (List.length el);
-	  aux2 el
-      end
-  and aux3 = function
-    |[] -> ()
-    |(p,e)::l -> (aux4 p); (aux2 (e::[])); aux3 l
-
-  and aux4 = function
-    Pconstr (s,pl) -> 
-      begin
-	if not (check_tuple_cons s) then	
-	  begin
-	    try
-	      let real_length = Hashtbl.find h s in
-	      let length = List.length pl in
-	      begin
-		if real_length = length then
-		  List.iter (aux4) pl
-		else
-		  print_error s real_length length (Econstr ("",[]))	 
-	      end
-	    with
-	    |Not_found -> raise (Unknow_arg ("constructor",s)) 
-	  end
-      end
-    |_ -> ()
-     
+let check_arity list =
+  let rec expr vars = function
+    | Evar x ->
+      if not (S.mem x vars) then unbound_var x
+    | Elet (x,e1,e2) -> expr vars e1; expr (S.add x vars) e2
+    | Eif (e1,e2,e3) -> expr vars e1; expr vars e2; expr vars e3
+    | Ematch (e,bl) -> expr vars e; List.iter (branch vars) bl
+    | Econstr (name,el)
+    | Ecall (name,el)  ->
+      let n = get_arity name in
+      let m = List.length el in
+      if m <> n then bad_arity name n m;
+      List.iter (expr vars) el
+  and branch vars (p, e) =
+    let vars = pattern vars p in
+    expr vars e
+  and pattern vars = function
+    | Pconstr (name, pl) ->
+      let n = get_arity name in
+      let m = List.length pl in
+      if m <> n then bad_arity name n m;
+      List.fold_left pattern vars pl
+    | Pvar x ->
+      S.add x vars
+    | Pwild ->
+      vars
   in
-  aux list
+  let decl = function
+  | Dconstructor (name, n) ->
+      Hashtbl.add arity name n
+  | Dfunction fl ->
+      List.iter (fun (name, args, _) ->
+	Hashtbl.add arity name (List.length args)) fl;
+      List.iter (fun (_,args,e) ->
+        let vars = List.fold_right S.add args S.empty in
+        expr vars e)
+        fl
+  in
+  List.iter decl list
 

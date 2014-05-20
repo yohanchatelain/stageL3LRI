@@ -14,11 +14,11 @@ let rec plus x y =
 
 let rec f x = g (S x)
 
-and g h q=
-match x with
-|S (S x) -> f x
-|T a b c  -> Unit
-|_ -> Unit
-end 
+and g x =
+  match x with
+  | S (S x) -> f x
+  | T a b c -> Unit
+  | _ -> Unit
+  end
 
 let rec h x = f (S x)

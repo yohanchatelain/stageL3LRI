@@ -1,5 +1,5 @@
 CMA=str.cma
-CMO=lexer.cmo parser.cmo static_analyze.cmo sct.cmo main.cmo
+CMO=lexer.cmo parser.cmo pretty.cmo static_analyze.cmo sct.cmo main.cmo
 GENERATED = lexer.ml parser.ml parser.mli
 BIN=sct
 FLAGS=-annot
