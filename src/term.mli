@@ -1,4 +1,3 @@
-
 type t = private
   | Tvar of string
   | Tcons of string * t
@@ -13,7 +12,10 @@ type t = private
 
 val var: string -> t
 val cons: string -> t -> t
-val destruct: string -> t list -> t
-
-(* ... *)
+val destruct: string -> t -> t
+val tuple: t list -> t
+val project: int -> t -> t
+val sum: t list -> t
+val approx: Infinity.t -> t -> t 
+val error: unit -> 'a
 

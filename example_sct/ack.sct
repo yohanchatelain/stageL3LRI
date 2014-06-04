@@ -3,9 +3,10 @@ constructor Succ 1
 
 let rec ack m n = 
   match (m,n) with
-  |(Zero , _ ) -> Succ n
-  |(Succ m,Zero) -> ack m (Succ n)
-  |(Succ m,Succ n) -> ack m (ack m n)
+  |(Zero,Zero) -> Succ Zero
+  |(Zero,Succ n ) -> Succ (Succ n)
+  |(Succ m,Zero) -> ack m (Succ Zero)
+  |(Succ m,Succ n) -> ack m (ack (Succ m) n)
 end
 
  

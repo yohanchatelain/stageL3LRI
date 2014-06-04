@@ -1,15 +1,32 @@
-
 open Format
 open Ast
+open Term
+open Substitution
 
 let iter n = for i = 0 to n-1 do printf "x%d " i done
 
+let list p s = function
+  |[] -> printf "%s" s
+  |h::t -> printf "%s[" s; p h; List.iter (fun s -> printf ","; p s) t;
+    printf "]"
+
+let tuple p l = 
+  printf "(";
+  let rec aux = function
+  |[] -> printf ")"
+  |hd::[] -> p hd ; printf ")" 
+  |hd::tl -> p hd; printf ","; aux tl
+  in
+  aux l
+
+let rec sum p = function
+  |[] -> ()
+  |hd::[] -> p hd;
+  |hd::tl -> p hd; printf "+" 
+ 
 let rec expr = function
   |Evar (s) -> printf "%s" s
-  |Econstr(s,[]) -> printf "%s[]" s
-  |Econstr (s,x::pl) ->
-    printf "%s[" s; expr x; List.iter (fun s -> printf ","; expr s) pl;
-    printf "]"
+  |Econstr(s,t) -> list expr s t
   |Ecall (s,el) -> printf "%s"  s; List.iter
     (fun e -> printf " "; expr e) el
   |Elet (s,e1,e2) -> printf "let %s = " s; expr e1;
@@ -24,10 +41,7 @@ let rec expr = function
 and pattern = function
   |Pwild -> printf "_"
   |Pvar s -> printf "%s" s
-  |Pconstr(s,[]) -> printf "%s[]" s
-  |Pconstr (s,x::pl) ->
-    printf "%s[" s; (pattern x); List.iter (fun s -> printf ","; pattern s) pl;
-    printf "]"
+  |Pconstr(s,t) -> list pattern s t
 
 and branch (p,e) =
   printf "| "; pattern p; printf " -> "; expr e; printf "@\n"
@@ -41,4 +55,29 @@ let decl = function
   |Dfunction l -> printf "@\n"; List.iter fundef l
 
 let program = List.iter decl
+
+let rec term = function
+  |Tvar s -> printf "%s" s
+  |Tcons (s,t) -> printf "%s" s; term t
+  |Tuple t -> tuple term t
+  |Tdestruc (s,t) -> printf "%s¯" s; term t
+  |Tproject (i,t) -> printf "π_%d" i; term t
+  |Tsum t -> sum term t
+  |Tapprox (i,t) -> printf "<"; Infinity.print i; printf ">"; term t
+  |Terror -> eprintf "error"
+
+let sym x = 
+  printf "%s:" x.name;
+  List.iter (fun s -> printf " %s" s) x.args
+
+let subst (s,m) =
+  let l = Env.bindings m in
+  printf "@[<v 2>%s:@\n[" s.name; 
+  let (ss,v) = List.hd l in
+  printf "%s := " ss; term v;
+  List.iter (fun (k,t) -> printf " ; ";printf "%s := " k; term t )
+  (List.tl l);
+  printf "]@]@\n@\n"
+
+let call = List.iter subst 
 

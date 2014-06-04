@@ -9,6 +9,10 @@ let parse_only = ref false
 let check_only = ref false
 let print = ref true
 
+(*Option pour le poids et la profondeur *)
+let b = ref 1
+let d = ref 2
+
 (* Noms du fichier source *)
 let source_file = ref ""
 

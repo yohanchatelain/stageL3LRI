@@ -1,5 +1,5 @@
-
 exception Error of string
 
 let prog p =
-  assert false (*TODO*)
+  let call = Substitution.call p in
+  List.iter Pretty.call call

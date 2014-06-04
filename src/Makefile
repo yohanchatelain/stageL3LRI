@@ -1,10 +1,14 @@
 CMA=str.cma
-CMO=lexer.cmo parser.cmo pretty.cmo static_analyze.cmo infinity.cmo \
-    term.cmo sct.cmo main.cmo
-GENERATED = lexer.ml parser.ml parser.mli
+CMO=lexer.cmo parser.cmo infinity.cmo static_analyze.cmo  \
+    term.cmo substitution.cmo pretty.cmo sct.cmo main.cmo
+GENERATED = lexer.ml parser.ml parser.mli 
 BIN=sct
-FLAGS=-annot
+FLAGS=-annot 
 all: $(BIN)
+	./$(BIN) ../example_sct/comb_size.sct
+	./$(BIN) ../example_sct/ack.sct
+	./$(BIN) ../example_sct/mutuel_rec1.sct
+	./$(BIN) ../example_sct/indirect_rec.sct
 	./$(BIN) test.sct
 
 $(BIN):$(CMO)	
