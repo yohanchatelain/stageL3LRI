@@ -1,5 +1,14 @@
+
+open Ast
+
 exception Error of string
 
+let decl = function
+  | Dconstructor _ ->
+    ()
+  | Dfunction l ->
+    let call = Substitution.defun l in
+    List.iter Pretty.call call
+
 let prog p =
-  let call = Substitution.call p in
-  List.iter Pretty.call call
+  List.iter decl p

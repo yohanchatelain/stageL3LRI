@@ -17,9 +17,11 @@ type expr =
 and branch =
   pattern * expr
 
+type defun = string * string list * expr
+
 type decl =
   | Dconstructor of string * int
-  | Dfunction of (string * string list * expr) list
+  | Dfunction of defun list
 
 type program =
   decl list

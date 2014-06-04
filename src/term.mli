@@ -16,6 +16,8 @@ val destruct: string -> t -> t
 val tuple: t list -> t
 val project: int -> t -> t
 val sum: t list -> t
-val approx: Infinity.t -> t -> t 
+val approx: Infinity.t -> t -> t
 val error: unit -> 'a
+
+val subst: string -> t -> t -> t
 

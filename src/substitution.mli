@@ -1,38 +1,11 @@
-module Env :
-sig
-    type key = String.t
-    type 'a t = 'a Map.Make(String).t
-    val empty : 'a t
-    val is_empty : 'a t -> bool
-    val mem : key -> 'a t -> bool
-    val add : key -> 'a -> 'a t -> 'a t
-    val singleton : key -> 'a -> 'a t
-    val remove : key -> 'a t -> 'a t
-    val merge :
-      (key -> 'a option -> 'b option -> 'c option) -> 'a t -> 'b t -> 'c t
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
-    val iter : (key -> 'a -> unit) -> 'a t -> unit
-    val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
-    val for_all : (key -> 'a -> bool) -> 'a t -> bool
-    val exists : (key -> 'a -> bool) -> 'a t -> bool
-    val filter : (key -> 'a -> bool) -> 'a t -> 'a t
-    val partition : (key -> 'a -> bool) -> 'a t -> 'a t * 'a t
-    val cardinal : 'a t -> int
-    val bindings : 'a t -> (key * 'a) list
-    val min_binding : 'a t -> key * 'a
-    val max_binding : 'a t -> key * 'a
-    val choose : 'a t -> key * 'a
-    val split : key -> 'a t -> 'a t * 'a option * 'a t
-    val find : key -> 'a t -> 'a
-    val map : ('a -> 'b) -> 'a t -> 'b t
-    val mapi : (key -> 'a -> 'b) -> 'a t -> 'b t
-  end
+
+module Env : Map.S with type key = string
+type subst = Term.t Env.t
 
 type sym = {name:string ; args:string list; id:int}
-type subst = sym * Term.t Env.t 
+type call = sym * Term.t Env.t
 
-val subst: string -> Term.t -> Term.t -> Term.t
-val pattern: Term.t Env.t -> Term.t -> Ast.pattern -> Term.t Env.t 
-val create: Term.t Env.t -> Ast.expr -> Term.t * subst list
-val call: Ast.decl list -> subst list list 
+val pattern: subst -> Term.t -> Ast.pattern -> subst
+val expr: subst -> Ast.expr -> Term.t * call list
+
+val defun: Ast.defun list -> call list list
