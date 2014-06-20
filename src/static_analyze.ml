@@ -1,4 +1,4 @@
-(* Static analyse *)
+(* Static analysis *)
 
 open Format
 open Ast

@@ -1,0 +1,12 @@
+constructor Leaf 0
+constructor Node 2
+
+constructor Zero 0
+constructor Succ 1
+
+let rec push_left x = 
+match x with
+| Leaf -> Leaf
+| Node t (Leaf) -> Node t Leaf
+| Node t1  (Node t2 t3) -> push_left (Node (Node t1 t2) t3)
+end

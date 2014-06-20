@@ -1,4 +1,3 @@
-
 type t =
  | Infinity
  | Int of int

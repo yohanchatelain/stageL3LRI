@@ -19,5 +19,16 @@ val sum: t list -> t
 val approx: Infinity.t -> t -> t
 val error: unit -> 'a
 
+val is_sum : t -> bool
+val list_of_sum : t -> t list
+
+val nb_destr : t -> int
+val nf: t -> t
+
 val subst: string -> t -> t -> t
 
+val decreasing_parameter : t -> t list
+val test : t -> t -> t -> bool
+
+val less : t*t -> bool
+val check_coherent: t*t -> bool

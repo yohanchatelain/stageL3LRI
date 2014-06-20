@@ -21,7 +21,7 @@ and g x =
   | _ -> Unit
   end
 
-let rec h x = f (S x)
+(*let rec h x = f (S x)*)
 
 let rec perm x y = 
   match (x,y) with

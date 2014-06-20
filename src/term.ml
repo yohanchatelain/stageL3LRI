@@ -1,3 +1,5 @@
+open Format 
+
 type t =
 | Tvar of string
 | Tcons of string * t
@@ -10,61 +12,181 @@ type t =
 
 exception Error
 
-let mtuple s = Str.string_match (Str.regexp "Tuple-[1-9][0-9]*") s 0
+let error t = raise Error
 
-let rec list = function
-  | Terror
-  | Tsum _
-  | Tvar _ -> raise Error
-  | Tcons (_,t)
-  | Tdestruc (_,t)
-  | Tproject (_,t)
-  | Tapprox (_,t) -> list t
-  | Tuple tl -> tl
+let unique = 
+  let rec aux acc = function
+    |[] -> acc
+  |hd::tl -> aux (if List.mem hd acc then acc else hd::acc) tl  
+  in
+  aux []
 
+let is_sum = function 
+  | Tsum _ -> true 
+  | _ -> false
+
+let list_of_sum = function
+  | Tsum l -> l
+  | _ -> assert false 
 
 let var x = Tvar x
 
-let sum l = Tsum l
+let rec sum  = function 
+  |hd::[] -> hd
+  |l -> 
+    let rec aux acc = function
+      |[] -> Tsum (unique acc)
+      |(Tsum l)::tl -> aux (acc@l) tl
+      |hd::tl -> aux (acc@[hd]) tl
+    in
+    aux [] l 
 
-let tuple l = Tuple l
+let tuple l =
+  let rec chck_sum pred = function
+    |[] -> Tuple pred 
+    |(Tsum l)::tl -> sum
+      (List.fold_left 
+	(fun acc t -> acc@[(chck_sum [] (pred@[t]@tl))] ) [] l)
+    |hd::tl -> chck_sum (pred@[hd]) tl
+  in
+  chck_sum [] l
 
-let cons s = function
-  | Tsum l -> Tsum (List.map (fun t -> Tcons (s, t)) l)
+let rec cons s = function
+  | Tuple [t] -> cons s t
+  | Tsum l -> sum (List.map (fun t -> cons s t) l)
   | t -> Tcons (s, t)
 
-let destruct s = function
-  | Tsum l -> Tsum (List.map (fun t -> Tdestruc (s,t)) l)
-  | Tcons(s',t) when s=s' -> t
-  | Tapprox(i,t) -> Tapprox  (Infinity.add_int (-1) i, t)
-  | t -> Tdestruc(s,t)
-
-let project i = function
- (* | Tdestruc (s,Tproject (i,Tdestruc (s',t))) when mtuple s ->
-	Tproject (i,(destruct s' (List.nth (list t) i))) *)
-  | Tsum l -> Tsum (List.map (fun t -> Tproject(i, t)) l)
-  | Tuple l -> List.nth l i
-  | Tapprox (j,t) -> Tapprox(Infinity.add_int (-1) j,t)
-  | t -> Tproject (i,t)
-
-let approx i = function
-  | Tsum l -> Tsum (List.map (fun t -> Tapprox(i,t)) l)
-  | Tcons(s,t) -> Tapprox (Infinity.add_int 1 i,t)
-  | Tapprox (j,t) -> Tapprox (Infinity.add i j,t)
+let rec approx i = function
+  | Tsum l -> sum (List.map (fun t -> approx i t ) l)
+  | Tcons(s,t) -> approx (Infinity.add_int 1 i) t
+  | Tapprox (j,t) -> approx (Infinity.add i j) t
   | Tuple l when List.length l > 0 ->
-    Tsum ( List.map (fun t -> Tapprox (Infinity.add_int 1 i,t)) l)
+    sum ( List.map (fun t -> approx (Infinity.add_int 1 i) t) l)
   | t -> Tapprox (i,t)
 
-let error () = raise Error
+let rec destruct s = function
+  | Tuple [l] -> destruct s l 
+  | Tuple _  -> failwith "destruct tuple"
+  | Tsum l -> Tsum (List.map (fun t -> destruct s t) l)
+  | Tcons(s',t) when s=s' -> t
+  | Tapprox(i,t) -> approx (Infinity.add_int (-1) i) t
+  | t -> Tdestruc(s,t)
+
+let rec project i = function
+  | Tsum l -> sum (List.map (fun t -> project i t) l)
+  | Tuple l -> 
+    begin
+      try 
+	List.nth l i 
+      with
+      |Failure _ ->  failwith "project i > n"  
+    end
+  | Tcons _  -> failwith "project cons"
+  | Tapprox (j,t) -> approx (Infinity.add_int (-1) j) t
+  | t -> Tproject (i,t)
+
+let rec nb_destr  = function
+  | Tvar _ -> 0
+  | Tdestruc (_,t) 
+  | Tproject (_,t) -> 1 + nb_destr t
+  | Tsum l
+  | Tuple l -> 
+    List.fold_left (fun a t -> Pervasives.max a (nb_destr t)) 0 l
+  | Tapprox (_,t)
+  | Tcons (_,t) -> nb_destr t
+  | Terror -> error ()
+
+let rec nf = function
+  | Tvar _ as t -> t
+  | Tcons (s,t) -> cons s (nf t)
+  | Tsum l -> sum (List.map nf l)
+  | Tuple l -> tuple (List.map nf l)
+  | Tdestruc (s,t) -> destruct s (nf t)
+  | Tproject (i,t) -> project i (nf t)
+  | Tapprox (i,t) -> approx i (nf t)
+  | Terror -> error ()
 
 let rec subst x t' = function
-  |Tvar y when x=y -> t'
-  |Tvar _ as t -> t
-  |Tcons (s,t) -> cons s (subst x t' t)
-  |Tuple tl -> tuple (List.map (subst x t') tl)
-  |Tdestruc (s,t) -> destruct s (subst x t' t)
-  |Tproject (i,t) -> project i (subst x t' t)
-  |Tsum tl -> sum (List.map (subst x t') tl)
-  |Tapprox (i,t) -> approx i (subst x t' t)
-  |Terror -> error ()
+  | Tvar y when x=y -> t'
+  | Tvar _ as t -> t
+  | Tcons (s,t) -> cons s (subst x t' t)
+  | Tuple tl -> tuple (List.map (subst x t') tl)
+  | Tdestruc (s,t) -> destruct s (subst x t' t)
+  | Tproject (i,t) -> project i (subst x t' t)
+  | Tsum tl -> sum (List.map (subst x t') tl)
+  | Tapprox (i,t) -> approx i (subst x t' t)
+  | Terror -> error ()
 
+(* b is_suffix of d *)
+let rec is_suffix = function
+  | Tvar x, Tvar y when x=y -> true
+  | _ ,Tvar _ -> false
+  | Tdestruc (s,t) , Tdestruc (s',t') ->
+    is_suffix (if s=s' then t,t' else t,Tdestruc (s',t'))
+  | Tproject (i,t) , Tproject (i',t') ->
+    is_suffix (if i=i' then (t,t') else (t,Tproject (i',t')))
+  | Tdestruc (_,t) , d 
+  | Tproject (_,t) , d -> is_suffix (t,d)
+  | _ -> false
+
+let rec less = function
+  | Tcons (x,t),Tcons (y,t') when x=y -> less (t,t')
+  | Tuple l, Tuple l' when List.length l = List.length l' ->
+    List.fold_left2
+    (fun acc u v ->  acc && less (u,v)) true l l'
+  | Tsum l, Tsum l' -> 
+    List.for_all (fun t -> List.exists (fun t' -> less (t,t')) l') l
+  | Tapprox (i,t) ,Tapprox (i',t') -> is_suffix (t',t) && 
+    Infinity.compare (Infinity.add_int (nb_destr t) i) 
+    (Infinity.add_int (nb_destr t') i') < 0
+  | t,(Tapprox _ as a) -> less ((approx (Infinity.Int 0) t),a) 
+  | t,t' when t = t' -> true
+  | _ -> false
+
+let decreasing_parameter =
+  let rec aux acc  = function 
+    | Tvar x as t -> t::acc
+    | Tcons (_,t) -> aux acc t
+    | Tsum l 
+    | Tuple l -> 
+      List.fold_left (fun acc t -> (aux [] t)@acc) [] l
+    | Tapprox (_,t) -> aux acc t
+    | Tproject (_,t')
+    | Tdestruc (_,t') as t -> aux (t::acc) t' 
+    | Terror -> error ()
+  in
+  aux []
+
+let rec is_subterm t = function
+  | t' when t = t' -> true
+  | Tvar x -> false
+  | Tcons (_,t')
+  | Tdestruc (_,t')
+  | Tproject (_,t')
+  | Tapprox (_,t') -> is_subterm t t'
+  | Tuple l 
+  | Tsum l -> List.exists (is_subterm t) l
+  | Terror -> error () 
+
+let test v t = function
+  | Tapprox (i,t') as epsilon when 
+      Infinity.compare (Infinity.Int 0) i > 0 ->
+    is_subterm t v  
+  | _ -> false 
+  
+let rec check_coherent = function
+  | t,t' when t=t' -> true
+  | Tcons (s,t), Tcons (s',t') when s=s' -> check_coherent (t,t')    
+  | Tuple l, Tuple l' when List.length l = List.length l' ->
+    List.fold_left2 (fun acc t t' -> acc && (check_coherent (t,t')))
+      true l l' 
+  | Tdestruc (s,t), Tdestruc (s',t') when s=s' -> check_coherent (t,t')
+  | Tproject (i,t), Tproject (i',t') when i=i' -> check_coherent (t,t')
+  | Tapprox (i,t), Tapprox (i',t') -> is_suffix (t,t') || is_suffix (t',t)
+  | Tcons (s,t) , Tsum l -> check_coherent (t,Tsum l)
+  | Tuple l, Tsum l'-> 
+    List.for_all (fun t -> check_coherent (t,Tsum l')) l
+  | Tsum l, Tsum l' ->
+    List.exists (fun t ->
+      List.exists (fun t' -> check_coherent (t,t')) l') l
+  |_ -> false

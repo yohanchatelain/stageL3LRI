@@ -2,59 +2,32 @@
 (* Fichier principal du compilateur sct *)
 
 open Format
+open Options
 open Lexing
-
-(* Option de compilation, pour s'arrêter à l'issue du parser *)
-let parse_only = ref false
-let check_only = ref false
-let print = ref true
-
-(*Option pour le poids et la profondeur *)
-let b = ref 1
-let d = ref 2
-
-(* Noms du fichier source *)
-let source_file = ref ""
-
-let set_file s = source_file := s
-
-(* Les options du compilateur que l'on affiche en tapant sct --help *)
-let options =
-  ["--parse-only", Arg.Set parse_only,
-   "  Pour ne faire uniquement que la phase d'analyse syntaxique";
-   "--check-only", Arg.Set check_only,
-   "  Pour ne faire uniquement que la vérification d'arité";
-   "--no-print", Arg.Clear print,
-   "  N'affiche pas l'arbre de syntax abstraite";
-  ]
-
-let usage = "usage: sct [option] file.sct"
 
 (* Localise une erreur en indiquant la ligne et la colonne *)
 let localisation pos =
   let l = pos.pos_lnum in
   let c = pos.pos_cnum - pos.pos_bol + 1 in
-  eprintf "File \"%s\", line %d, characters %d-%d:\n" !source_file l (c-1) c
+  eprintf "File \"%s\", line %d, characters %d-%d:\n" source_file l (c-1) c
 
 let () =
-  (* Parsing de la ligne de commande *)
-  Arg.parse options set_file usage;
-
+  
   (* On vérifie que le nom du fichier source a bien été indiqué *)
-  if !source_file = "" then begin
+  if source_file = "" then begin
     eprintf "Aucun fichier à compiler\n@?";
     exit 1
   end;
 
   (* Ce fichier doit avoir l'extension .sct *)
-  if not (Filename.check_suffix !source_file ".sct") then begin
+  if not (Filename.check_suffix source_file ".sct") then begin
     eprintf "Le fichier d'entrée doit avoir l'extension .sct\n@?";
     Arg.usage options usage;
-    exit 1
+     exit 1
   end;
 
   (* Ouverture du fichier source en lecture *)
-  let f = open_in !source_file in
+  let f = open_in source_file in
 
   (* Création d'un tampon d'analyse lexicale *)
   let buf = Lexing.from_channel f in
@@ -69,14 +42,14 @@ let () =
     close_in f;
 
     (* On s'arrête ici si on ne veut faire que le parsing *)
-    if !parse_only then exit 0;
+    if parse_only then exit 0;
 
     Static_analyze.check_arity p;
-    if !check_only then exit 0;
+    if check_only then exit 0;
 
-    if !print then begin Pretty.program p; printf "@." end;
+    if print then begin Pretty.program p; printf "@." end;
 
-    Sct.prog p
+    Sct.prog p 
   with
     | Lexer.Lexing_error c ->
 	(* Erreur lexicale. On récupère sa position absolue et

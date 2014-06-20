@@ -1,4 +1,3 @@
-
 type t =
  | Infinity
  | Int of int
@@ -16,11 +15,6 @@ let max x y =
   match x, y with
   |Infinity,_ | _,Infinity -> Infinity
   |Int i1, Int i2 -> Int (max i1 i2)
-
-let opposate x = 
-  match x with
-  |Infinity -> Infinity
-  |Int w -> Int (-w)
 
 (* 0 if i1 = i2 , -1 if i1 < i2 , 1 if i1 > i2 *)
 let compare x y = 

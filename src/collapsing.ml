@@ -3,36 +3,25 @@ open Term
 let b = Options.b
 let d = Options.d
 
-let rec nb_destr  = function
-  | Tvar _ -> 0
-  | Tdestruc (_,t) 
-  | Tproject (_,t) -> 1 + nb_destr t
-  | Tsum l
-  | Tuple l -> 
-    List.fold_left (fun a t -> Pervasives.max a (nb_destr t)) 0 l
-  | Tapprox (_,t)
-  | Tcons (_,t) -> nb_destr t
-  | Terror -> Term.error ()
-
 let collapse_D t =
   let rec up i = function
     | Tsum l -> sum (List.map (up i) l)
     | Tcons (s,t) when i > 0 -> cons s (up (i-1) t)
     | Tuple l when i > 0 -> tuple (List.map (up (i-1)) l)
     | Tapprox (i',ta) when i > 0 -> approx i' (down ta) 
+    | Tdestruc _ 
+    | Tproject _ as t when i >= 0 -> down t
     | t when i = 0 -> nf (down (approx (Infinity.Int 0) t))
     | Tvar _ as t -> t 
-    | Tdestruc _ 
-    | Tproject _ as t when i > 0 -> down t
     | t -> Term.error ()
 
   and down = function
     | Tsum l -> sum (List.map down l)
     | Tapprox (i',t) -> approx i' (down t)
-    | t when nb_destr t <= d -> t
-    | Tvar _ as t -> t 
+    | t when Term.nb_destr t <= d -> t
+    | Tvar _ as t -> t     
     | Tdestruc (_,t') 
-    | Tproject (_,t') as t when nb_destr t > d 
+    | Tproject (_,t') as t when Term.nb_destr t > d 
 	-> approx (Infinity.Int (-1)) (down t')
     | t -> Term.error ()
   in
@@ -41,7 +30,7 @@ let collapse_D t =
 let ceil = function
   | Infinity.Infinity -> Infinity.Infinity
   | Infinity.Int w -> 
-    begin
+    begin 
       if w < -b then
 	Infinity.Int (-b)
       else if w >= b then

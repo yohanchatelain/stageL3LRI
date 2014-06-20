@@ -22,7 +22,7 @@ let tuple p l =
 let rec sum p = function
   |[] -> ()
   |hd::[] -> p hd;
-  |hd::tl -> p hd; printf "+" 
+  |hd::tl -> p hd; printf " + "; sum p tl 
  
 let rec expr = function
   |Evar (s) -> printf "%s" s
@@ -58,6 +58,7 @@ let program = List.iter decl
 
 let rec term = function
   |Tvar s -> printf "%s" s
+  |Tcons (s,Tvar s') -> printf "%s "s; printf "%s" s'  
   |Tcons (s,t) -> printf "%s" s; term t
   |Tuple t -> tuple term t
   |Tdestruc (s,t) -> printf "%s¯" s; term t
@@ -79,5 +80,28 @@ let subst (s,m) =
   (List.tl l);
   printf "]@]@\n@\n"
 
-let call = List.iter subst 
+let call = List.iter subst
 
+let cfg g =
+  let t = List.sort (fun (i,_) (j,_) -> Pervasives.compare i j ) (Cfg.symtab g) in 
+  Array.iteri (fun i l ->
+    printf "@[<v 2>%s :@\n" (List.assoc i t) ;
+    Array.iteri (fun j c ->
+      printf "@[<v>-%s : " (List.assoc j t);	
+      if Cfg.Edge.is_empty c then 
+	printf "Ø"
+      else 
+	begin
+	  printf "@[<v>";
+	  Cfg.Edge.iter (fun c ->
+	    let l = Env.bindings c in
+       	    let (ss,v) = List.hd l in
+	    printf "[%s := " ss; term v;
+	    List.iter (fun (k,t) -> printf " ; ";printf "%s := " k; term t )
+	      (List.tl l);     	  
+	    printf "]@,") c;
+	  printf "@]"
+	end; 
+      printf "@,@]") l ; printf "@." ) (Cfg.get_graph g)
+    
+let separator () = for i = 0 to 50 do printf "_" done; printf "@.\n\n"

@@ -1,7 +1,7 @@
 constructor Nil 0
 constructor Cons 1
 
-let rec function h1 x = 
+let rec h1 x = 
 match x with
 |Cons (Cons (Cons x)) -> h2 x
 end

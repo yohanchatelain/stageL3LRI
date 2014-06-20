@@ -5,5 +5,6 @@ val d : int
 val parse_only : bool
 val check_only : bool
 val print : bool
+val print_step : bool
 val source_file : string 
 val usage : string
