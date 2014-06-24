@@ -1,0 +1,17 @@
+constructor True 0
+constructor False 0
+
+constructor Zero 0 
+constructor Succ 1
+
+let rec even n = 
+match n with
+| Zero -> True
+| Succ n -> odd n 
+end
+
+and odd n = 
+match n with 
+| Zero -> False
+| Succ n -> even n
+end

@@ -28,6 +28,7 @@ let equal cfg1 cfg2 =
   !bool
 
 let get_graph g = g.graph
+let get_funtab g = g.funtab 
 
 let reset = ref (-1)
 
@@ -120,22 +121,22 @@ let computation g1 g2 =
 
 let separator () = 
   for i = 0 to 50 do Format.printf "_" done;
-  Format.printf "@.\n\n"
+  Format.printf "@\n@\n"
 
 let print_step =
   let count  = ref (-1) in
   fun p gn -> incr count; 
-    Printf.printf "G%d\n" !count;
+    Format.printf "G%d@\n@\n" !count;
     p gn;
     separator ()
 
-let cloture p g = 
+let cloture p g =  
   let gn = ref g in
   let gn_1 = ref (computation g g) in
   gn_1 := union !gn !gn_1;
   while  not (equal !gn !gn_1) do
     if Options.print_step then
-      print_step p !gn;
+     print_step p !gn;
     gn := !gn_1;
     gn_1 := union !gn (computation !gn g);
   done;

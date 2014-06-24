@@ -6,7 +6,7 @@ GENERATED =lexer.ml parser.ml parser.mli
 BIN=sct
 FLAGS=-annot
 all: $(BIN)
-	./$(BIN)  ../example_sct/triple_rec1.sct
+	./$(BIN) ../example_sct/triple_rec1.sct
 	./$(BIN) ../example_sct/perm.sct
 	./$(BIN) ../example_sct/ack.sct	
 	./$(BIN) ../example_sct/mutuel_rec1.sct

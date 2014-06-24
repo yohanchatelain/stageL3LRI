@@ -24,6 +24,8 @@ let compare x y =
   | _,Infinity -> -1
   | Int i1, Int i2 -> compare i1 i2
 
+let equal x y = compare x y = 0
+
 let print = function
   |Infinity -> Format.printf "∞"
   |Int i -> Format.printf "%d" i

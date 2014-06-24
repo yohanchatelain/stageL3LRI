@@ -17,10 +17,10 @@ let error t = raise Error
 let unique = 
   let rec aux acc = function
     |[] -> acc
-  |hd::tl -> aux (if List.mem hd acc then acc else hd::acc) tl  
+    |hd::tl -> aux (if List.mem hd acc then acc else hd::acc) tl  
   in
   aux []
-
+    
 let is_sum = function 
   | Tsum _ -> true 
   | _ -> false
@@ -30,24 +30,24 @@ let list_of_sum = function
   | _ -> assert false 
 
 let var x = Tvar x
-
+  
 let rec sum  = function 
-  |hd::[] -> hd
-  |l -> 
+  | hd::[] -> hd
+  | l -> 
     let rec aux acc = function
-      |[] -> Tsum (unique acc)
-      |(Tsum l)::tl -> aux (acc@l) tl
-      |hd::tl -> aux (acc@[hd]) tl
+      | [] -> Tsum (unique acc)
+      | (Tsum l)::tl -> aux (acc@l) tl
+      | hd::tl -> aux (acc@[hd]) tl
     in
     aux [] l 
-
+      
 let tuple l =
   let rec chck_sum pred = function
-    |[] -> Tuple pred 
-    |(Tsum l)::tl -> sum
+    | [] -> Tuple pred 
+    | (Tsum l)::tl -> sum
       (List.fold_left 
 	(fun acc t -> acc@[(chck_sum [] (pred@[t]@tl))] ) [] l)
-    |hd::tl -> chck_sum (pred@[hd]) tl
+    | hd::tl -> chck_sum (pred@[hd]) tl
   in
   chck_sum [] l
 
@@ -130,29 +130,32 @@ let rec is_suffix = function
   | _ -> false
 
 let rec less = function
-  | Tcons (x,t),Tcons (y,t') when x=y -> less (t,t')
-  | Tuple l, Tuple l' when List.length l = List.length l' ->
-    List.fold_left2
-    (fun acc u v ->  acc && less (u,v)) true l l'
+  | t,t' when t = t' -> true
+  | t, Tapprox (Infinity.Int 0,t') when t=t' -> true 
   | Tsum l, Tsum l' -> 
     List.for_all (fun t -> List.exists (fun t' -> less (t,t')) l') l
+  | Tdestruc (_,t),Tapprox (i,t') 
+  | Tproject (_,t),Tapprox (i,t') 
+    when (Infinity.compare (Infinity.Int 0) i) > 0 -> true
+  | Tcons (x,t),Tcons (y,t') when x=y -> less (t,t')
+  | Tuple l, Tuple l' when List.length l = List.length l' ->
+    List.for_all2 (fun u v -> less (u,v)) l l'
   | Tapprox (i,t) ,Tapprox (i',t') -> is_suffix (t',t) && 
     Infinity.compare (Infinity.add_int (nb_destr t) i) 
     (Infinity.add_int (nb_destr t') i') < 0
   | t,(Tapprox _ as a) -> less ((approx (Infinity.Int 0) t),a) 
-  | t,t' when t = t' -> true
   | _ -> false
 
 let decreasing_parameter =
   let rec aux acc  = function 
-    | Tvar x as t -> t::acc
+    | Tvar x as t -> (approx (Infinity.Int 0)t)::acc
     | Tcons (_,t) -> aux acc t
     | Tsum l 
     | Tuple l -> 
       List.fold_left (fun acc t -> (aux [] t)@acc) [] l
     | Tapprox (_,t) -> aux acc t
     | Tproject (_,t')
-    | Tdestruc (_,t') as t -> aux (t::acc) t' 
+    | Tdestruc (_,t') as t -> aux ((approx (Infinity.Int 0) t)::acc) t' 
     | Terror -> error ()
   in
   aux []
@@ -168,10 +171,10 @@ let rec is_subterm t = function
   | Tsum l -> List.exists (is_subterm t) l
   | Terror -> error () 
 
-let test v t = function
-  | Tapprox (i,t') as epsilon when 
+let test v = function
+  | Tapprox (_,t),Tapprox (i,t') when 
       Infinity.compare (Infinity.Int 0) i > 0 ->
-    is_subterm t v  
+    is_subterm t v && t = t'
   | _ -> false 
   
 let rec check_coherent = function
@@ -189,4 +192,4 @@ let rec check_coherent = function
   | Tsum l, Tsum l' ->
     List.exists (fun t ->
       List.exists (fun t' -> check_coherent (t,t')) l') l
-  |_ -> false
+  | _ -> false

@@ -28,7 +28,7 @@ val nf: t -> t
 val subst: string -> t -> t -> t
 
 val decreasing_parameter : t -> t list
-val test : t -> t -> t -> bool
+val test : t -> t*t  -> bool
 
 val less : t*t -> bool
 val check_coherent: t*t -> bool

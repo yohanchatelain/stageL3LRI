@@ -14,21 +14,21 @@ let mk_sym =
   let r = ref 0 in
   fun ?args name -> incr r;
     match args with
-    |Some l ->
+    | Some l ->
       let s = {name = name; args = l ; id = !r } in
       Hashtbl.add sym name s; s
-    |None ->
+    | None ->
       let x = Hashtbl.find sym name in
       {name = name; args = x.args; id = !r }
-
+	
 let compare = Env.compare Pervasives.compare
 let equal = Env.equal (fun t1 t2 -> t1 = t2) 
-
+  
 let union = Env.merge (fun k x y ->
   match x,y with
-  |Some m1, Some m2 -> Some m2
-  |m, None
-  |None,m ->  m)
+  | Some m1, Some m2 -> Some m2
+  | m, None
+  | None, m ->  m)
 
 let rec pattern sub t = function
   | Pvar s ->
@@ -41,17 +41,17 @@ let rec pattern sub t = function
   | Pwild -> sub
 
 let rec expr sub = function
-  |Elet (s,e1,e2) ->
+  | Elet (s,e1,e2) ->
     let (t1,cl1) = expr sub e1 in
     let sub = Env.add s t1 sub in
     let (t2,cl2) = expr sub e2 in
     t2, List.rev_append cl1 cl2
-  |Eif (c,e1,e2) ->
+  | Eif (c,e1,e2) ->
     let (t,cl) = expr sub c in
     let (t1,cl1) = expr sub e1 in
     let (t2,cl2) = expr sub e2 in
     sum (t::t1::t2::[]),List.rev_append cl2 (List.rev_append cl  cl1)
-  |Ecall (s,el) ->
+  | Ecall (s,el) ->
     let s = mk_sym s in
     let (cl,sb) = List.fold_left2
       (fun (l,sub) a e ->
@@ -61,20 +61,20 @@ let rec expr sub = function
     let (sb,_) = Env.partition (fun a _ -> List.mem a s.args) sb in    
     let l = List.map (fun arg -> approx Infinity (var arg)) s.args in
     sum l,(s,sb)::cl
-  |Ematch (e,bl) ->
+  | Ematch (e,bl) ->
     let (tm,cl) = expr sub e in
     let (t,c) = List.fold_left (fun (t,cl) (p,e) ->
       let sub = pattern sub tm p in
       let (t',cl') = expr sub e in
       t'::t,cl@cl') ([tm],cl) bl
     in sum (List.rev t),c
-  |Econstr (s,el) ->
+  | Econstr (s,el) ->
     let (l,cl) = List.fold_left (fun (t,cl) e ->
       let (t',cl') = expr sub e in
       t'::t,List.rev_append cl cl') ([],[]) el in
     (cons s (tuple (List.rev l))),cl
-  |Evar s -> (subst s (var s) (Env.find s sub),[])
-
+  | Evar s -> (subst s (var s) (Env.find s sub),[])
+    
 (* sub1 ° sub2 *)
 let compose sub2 sub1 =
   Env.map (fun t ->
