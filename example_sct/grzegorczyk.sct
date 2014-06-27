@@ -1,0 +1,9 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec phi n m = 
+match (n,m) with 
+| (Zero,_) -> Succ m
+| (Succ n,Zero) -> phi n (Succ Zero)
+| (Succ n, Succ m) -> phi n (phi (Succ n) m)
+end

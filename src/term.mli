@@ -17,7 +17,7 @@ val tuple: t list -> t
 val project: int -> t -> t
 val sum: t list -> t
 val approx: Infinity.t -> t -> t
-val error: unit -> 'a
+val error: string -> 'a
 
 val is_sum : t -> bool
 val list_of_sum : t -> t list
@@ -27,7 +27,7 @@ val nf: t -> t
 
 val subst: string -> t -> t -> t
 
-val decreasing_parameter : t -> t list
+val subterm : t -> t list
 val test : t -> t*t  -> bool
 
 val less : t*t -> bool

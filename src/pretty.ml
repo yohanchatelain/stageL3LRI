@@ -36,8 +36,8 @@ let rec expr = function
   | Elet (s,e1,e2) -> printf "let %s = " s; expr e1;
     printf " in @\n"; expr e2
   | Eif (e1,e2,e3) ->
-    printf "if "; expr e1; printf " then "; expr e2;
-    printf " else "; expr e3
+    printf "if "; expr e1; printf " then @\n "; expr e2;
+    printf "@\nelse@\n "; expr e3
   | Ematch (e,bl) ->
     printf "@[<v>match "; expr e ; printf " with@\n";
     List.iter branch bl; printf "end@]"
@@ -90,9 +90,9 @@ let cfg g =
   let t = List.sort (fun (i,_) (j,_) -> Pervasives.compare i j )
   (Cfg.symtab g) in 
   Array.iteri (fun i l ->
-    printf "@[<v 2>%s :@\n" (List.assoc i t) ;
+    printf "@[<v 2>%s :@\n" ((List.assoc i t)) ;
     Array.iteri (fun j c ->
-      printf "@[<v>-%s : " (List.assoc j t);	     
+      printf "@[<v>-%s : " ((List.assoc j t));	     
       printf "@[<v>";
       if Cfg.Edge.is_empty c then 
 	printf "Ø";
@@ -104,8 +104,7 @@ let cfg g =
 	  (List.tl l);     	  
 	printf "]@ ") c;
       printf "@]";
-      printf "@]@\n") l ; printf "@]@\n" ) (Cfg.get_graph g)
- 
+      printf "@]@\n") l ; printf "@]@\n" ) (Cfg.get_graph g) 
     
 let decl = function
   | Dconstructor _ ->
@@ -114,7 +113,7 @@ let decl = function
     let gl = Cfg.create l in
     cfg gl
 
-let funtab =  Hashtbl.iter (fun k _ -> printf "%s " k) 
+let funtab =  Hashtbl.iter (fun k _ -> printf "%s " k)
 
 let coherent_loop e = 
   printf "@[<v>";
@@ -127,4 +126,11 @@ let coherent_loop e =
     printf "]@,") e;
   printf "@]"
 
+
 let separator () = for i = 0 to 50 do printf "_" done; printf "@.\n\n"
+
+let cloture g = 
+  printf "G+ :@\n@\n";
+  cfg g;
+  separator ()
+

@@ -1,0 +1,30 @@
+constructor True 0
+constructor False 0
+
+constructor Zero 0
+constructor Succ 1
+
+constructor Nil 0
+constructor Cons 2
+
+let rec equal p n = 
+match (p,n) with
+| (Zero,Zero) -> True
+| (Succ p,Succ n) -> equal p n
+| _ -> False
+end
+
+let rec g x = 
+match x with
+| Zero -> Zero
+| Succ x -> Succ (f x (Cons Zero (Cons (Succ Zero) (Succ (Succ Zero)))))
+end 
+
+and f d s = 
+match (d,s) with
+| (d,Cons hd tl) -> 
+  if equal d hd then  
+    g hd
+  else
+    f d tl
+end

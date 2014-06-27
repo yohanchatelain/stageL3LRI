@@ -1,0 +1,27 @@
+constructor True 0
+constructor False 0
+
+constructor Zero 0
+constructor Succ 1
+
+let rec equal p n = 
+  match (p,n) with
+  | (Zero,Zero) -> True
+  | (Succ p,Succ n) -> equal p n
+  | _ -> False
+end
+
+let rec plus p n =
+  match n with
+  | Zero -> p
+  | Succ n -> Succ (plus p n)
+end 
+
+let rec coef_bin n p =
+  if equal p n then
+    Succ Zero
+  else
+    match (n,p) with
+    | (_,Zero) -> Succ Zero
+    | (Succ n_1,Succ p_1) -> plus (coef_bin  n_1 p)  (coef_bin n_1 p_1)
+ end

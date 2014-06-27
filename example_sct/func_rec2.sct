@@ -1,0 +1,15 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec f x y = 
+match x with
+| Zero -> y
+| Succ x -> f x (Succ y)
+end
+
+let rec g x y =
+match (x,y) with
+| (_,Zero) -> x
+| (Zero,Succ y_1) -> g y y_1
+| (Succ x,_) -> g y x 
+end 

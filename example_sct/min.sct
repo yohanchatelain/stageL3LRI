@@ -1,0 +1,9 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec min m n = 
+  match (m,n) with
+  | (_,Zero) -> Zero
+  | (Zero,Succ n) -> Zero
+  | (Succ m, Succ n) -> Succ (min m n)
+end

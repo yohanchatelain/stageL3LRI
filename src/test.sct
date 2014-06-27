@@ -15,9 +15,8 @@ let rec plus x y =
 let rec f x = g (S x)
 
 and g x =
-  match S x with
+  match x with
   | S (S y) -> f y
-  | T a b c -> Unit
   | _ -> Unit
   end
 
@@ -26,5 +25,5 @@ and g x =
 let rec perm x y = 
   match (x,y) with
   |(S x,S y) -> O
-  |_ -> perm (S x) (S y)
+  |_ -> perm (S y) (S x)
 end

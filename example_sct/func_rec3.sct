@@ -1,0 +1,8 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec add x y =
+  match x with
+  | Zero -> y
+  | Succ x -> Succ (add x y)
+end

@@ -1,0 +1,17 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec loop1 i j n a = 
+  match i with
+  | Zero -> a
+  | Succ i -> loop2 i n n a
+end 
+
+and loop2 i j n a =
+    match j with
+    | Zero -> loop1 i j n a
+    | Succ j -> loop2 i j n (Succ a)
+end  
+
+let mult m n = loop1 m Zero n Zero
+

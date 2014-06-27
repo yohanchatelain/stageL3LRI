@@ -1,0 +1,38 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec plus m n = 
+  match n with
+  | Zero -> m
+  | Succ n -> Succ (plus m n)
+end 
+
+let rec mult m n = 
+  match n with
+  | Zero -> Zero
+  | Succ n -> plus (mult m n) m  
+end 
+
+let rec f x y = 
+  match x with
+  | Zero -> y
+  | _ -> g x y y
+end 
+
+and g u v w =
+    match (u,v) with
+    | (Succ u,Zero) -> f u w
+    | (_,Succ v) -> g u v (mult (Succ (Succ Zero)) w)
+end 
+
+let rec f1 x y u v w = 
+  match x with
+  | Zero -> y
+  | _ -> g1 x y x y y
+end 
+
+and g1 x y u v w = 
+    match (u,v) with
+    | (Succ u_1, Zero) -> f1 u_1 w u v w
+    | (_,Succ v) -> g1 x y u v (mult (Succ (Succ Zero)) w)
+end  

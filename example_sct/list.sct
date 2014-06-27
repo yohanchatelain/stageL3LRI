@@ -10,6 +10,13 @@ constructor Equal 2
 constructor Nil 0
 constructor Cons 2
 
+let rec less x y = 
+match (x,y) with
+| (_,Zero) -> False
+| (Zero,_) -> True
+| (Succ x,Succ y) -> less x y
+end 
+
 let rec length l =
 match l with 
 | Nil -> Zero
@@ -57,3 +64,13 @@ end
 
 and f a b = Cons a b
  
+let rec merge l1 l2 =
+  match (l1,l2) with
+  | (Nil,_) -> l2
+  | (Cons c1 l1s,Nil) -> l1
+  | (Cons c1 l1s,Cons c2 l2s) -> 
+    if (less c1 c2) then
+      Cons c1 (merge l1s l2)
+    else
+      Cons c2 (merge l1 l2s)
+end 

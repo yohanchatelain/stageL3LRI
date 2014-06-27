@@ -1,0 +1,15 @@
+constructor Zero 0
+constructor Succ 1
+
+let rec plus p n =
+  match n with
+  | Zero -> p
+  | Succ n -> Succ (plus p n)
+end 
+
+let rec fib n =
+  match n with
+  | Zero -> Zero
+  | Succ (Zero) -> Succ Zero
+  | Succ (Succ n) -> plus (fib n) (fib (Succ n))
+end

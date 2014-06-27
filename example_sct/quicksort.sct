@@ -1,0 +1,38 @@
+constructor Zero 0
+constructor Succ 1
+
+constructor True 0
+constructor False 0
+
+constructor Nil 0
+constructor Cons 2
+
+let rec less x y = 
+match (x,y) with
+| (_,Zero) -> False
+| (Zero,_) -> True
+| (Succ x,Succ y) -> less x y
+end 
+
+let rec append l1 l2 = 
+match l1 with
+| Nil -> l2
+| Cons x1 r1 -> Cons x1 (append r1 l2)
+end
+
+let rec sort xs = 
+  match xs with
+  | Nil -> Nil
+  | Cons x xt -> partition xt Nil Nil x
+end 
+
+and partition xs lt rt pvt =
+    match xs with
+    | Nil -> 
+      append (sort lt) (append (Cons pvt Nil) (sort rt))
+    | Cons x xt -> 
+      if less x pvt then
+	partition xt (Cons x lt) rt pvt
+      else
+	partition xt lt (Cons x rt) pvt
+end 

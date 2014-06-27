@@ -1,0 +1,21 @@
+constructor Zero 0
+constructor Succ 1
+
+constructor True 0
+constructor False 0
+
+let rec less x y = 
+match (x,y) with
+| (_,Zero) -> False
+| (Zero,_) -> True
+| (Succ x,Succ y) -> less x y
+end 
+
+let rec tak x y z =
+  if less y x then
+    match (x,y,z) with
+    | (Succ x_1,Succ y_1,Succ z_1) -> tak 
+   (tak x_1 y z) (tak y_1 z x) (tak z_1 x y)
+    end 
+  else 
+    z

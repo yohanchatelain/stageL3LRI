@@ -32,6 +32,8 @@ decl:
   { Dconstructor (id, n) }
 | LET; REC; l = separated_nonempty_list(AND, fundef)
    { Dfunction l}
+| LET; f = fundef 
+   { Dfunction [f] }
 ;
 
 fundef:

@@ -7,4 +7,5 @@ val cfg : Cfg.t -> unit
 val decl : Ast.decl -> unit
 val funtab : Cfg.funtab -> unit
 val coherent_loop : Cfg.Edge.t -> unit
+val cloture : Cfg.t -> unit 
 val separator : unit -> unit 

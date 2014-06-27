@@ -1,0 +1,10 @@
+constructor Nil 0
+constructor Cons 2
+
+let rec rev ls = r1 ls Nil
+
+and r1 ls a = 
+match ls with 
+| Nil -> a
+| Cons hd tl -> r1 tl (Cons hd a)
+end
