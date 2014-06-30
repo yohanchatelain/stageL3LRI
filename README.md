@@ -93,7 +93,7 @@ Partial application is not allowed and no type checking is made.
       | Succ n -> n 
       
 
-Many example are in folder example/
+Many examples are in folder example_sct/
 
 ----------
 Report bug
